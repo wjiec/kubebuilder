@@ -76,10 +76,8 @@ spec:
       labels:
         {{ "{{- include \"chart.labels\" . | nindent 8 }}" }}
         control-plane: controller-manager
-        {{ "{{- if and .Values.controllerManager.pod .Values.controllerManager.pod.labels }}" }}
-        {{ "{{- range $key, $value := .Values.controllerManager.pod.labels }}" }}
-        {{ "{{ $key }}" }}: {{ "{{ $value }}" }}
-        {{ "{{- end }}" }}
+        {{ "{{- with .Values.controllerManager.pod.labels }}" }}
+        {{ "{{- toYaml . | nindent 8 }}" }}
         {{ "{{- end }}" }}
     spec:
       containers:
@@ -94,8 +92,8 @@ spec:
           {{ "{{- if .Values.controllerManager.container.env }}" }}
           env:
             {{ "{{- range $key, $value := .Values.controllerManager.container.env }}" }}
-            - name: {{ "{{ $key }}" }}
-              value: {{ "{{ $value }}" }}
+            - name: {{ "{{ $key | quote }}" }}
+              value: {{ "{{ $value | quote }}" }}
             {{ "{{- end }}" }}
           {{ "{{- end }}" }}
           livenessProbe:
@@ -131,7 +129,7 @@ spec:
           {{ "{{- end }}" }}
       securityContext:
         {{ "{{- toYaml .Values.controllerManager.securityContext | nindent 8 }}" }}
-      serviceAccountName: {{ "{{ .Values.controllerManager.serviceAccountName }}" }}
+      serviceAccountName: {{ "{{ .Values.controllerManager.serviceAccount.name }}" }}
       terminationGracePeriodSeconds: {{ "{{ .Values.controllerManager.terminationGracePeriodSeconds }}" }}
       {{ "{{- if and .Values.certmanager.enable (or .Values.webhook.enable .Values.metrics.enable) }}" }}
       volumes:
